@@ -61,6 +61,10 @@ struct udp
     uint16_t checksum;
 }__attribute__((packed));
 
-
+#define ETH_SIZE 14
+#define ARP_SIZE 28
+#define IP_SIZE 20
+#define TCP_SIZE 20
+#define UDP_SIZE 8
 
 #endif
