@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <pcap.h>
 
 struct ethernet 
 {/* 14 bytes */
