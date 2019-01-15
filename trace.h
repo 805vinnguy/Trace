@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <pcap.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <netinet/ether.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 struct ethernet 
 {/* 14 bytes */
