@@ -22,5 +22,6 @@ int main(int argc, char* argv[])
         fprintf(stdout, "\nPacket number: %d  Packet Len: %u\n\n", pktnum, pktlen);
     }
 
+    pcap_close(tracefile);
     exit(EXIT_SUCCESS);
 }
