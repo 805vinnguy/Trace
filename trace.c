@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
         print_pkthdr(pktnum, pktheader);
         ethheader = (struct ethernet*)(pktdata);
         
-        /* print_ethhdr(ethheader); */
+        print_ethhdr(ethheader);
     }
 
     pcap_close(tracefile);
