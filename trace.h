@@ -13,17 +13,17 @@
 
 struct ethernet 
 {/* 14 bytes */
-    uint8_t src[6];            /* source MAC */
-    uint8_t dst[6];            /* destination MAC */
-    uint16_t next_protocol;
+    struct ether_addr src;     /* source MAC */
+    struct ether_addr dst;     /* destination MAC */
+    uint16_t type;             /* next protocol */
 }__attribute__((packed));
 
 struct arp
 {/* 28 bytes */
     uint16_t htype;            /* hardware type */
     uint16_t ptype;            /* protocol type */
-    uint8_t hlen;              /* hardware address length */
-    uint8_t plen;              /* protocol address length */
+    uint8_t hLen;              /* hardware address length */
+    uint8_t pLen;              /* protocol address length */
     uint16_t oper;             /* operation */
     uint8_t sha[6];            /* sender hardware address */
     uint8_t spa[4];            /* sender protocol address */
@@ -35,7 +35,7 @@ struct ip
 {/* 20 bytes min */
     uint8_t ver_IHL;           /* version(4) IHL(4) */
     uint8_t TOS;               /* DSCP(6) ECN(2) */
-    uint16_t length;           /* header length (bytes) */
+    uint16_t length;           /* length header + data (bytes) */
     uint16_t id;               
     uint16_t flags_frag;
     uint8_t TTL;               /* time to live */
@@ -72,5 +72,12 @@ struct udp
 #define IP_SIZE_MIN 20
 #define TCP_SIZE_MIN 20
 #define UDP_SIZE 8
+
+#define ETHER_TYPE_IP 0x0800
+#define ETHER_TYPE_ARP 0x0806
+
+void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
+void print_ethhdr(struct ethernet* ethheader);
+    char* determine_ether_type(uint16_t type);
 
 #endif
