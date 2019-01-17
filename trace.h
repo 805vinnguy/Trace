@@ -78,6 +78,8 @@ struct udp
 
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
 void print_ethhdr(struct ethernet* ethheader);
-    char* determine_ether_type(uint16_t type);
+    char* determine_ether_type(uint16_t type_network);
+
+void* safe_malloc(size_t size);
 
 #endif

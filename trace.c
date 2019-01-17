@@ -32,22 +32,25 @@ int main(int argc, char* argv[])
     exit(EXIT_SUCCESS);
 }
 
-void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader) {
+void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader) 
+{
     uint32_t pktlen = (uint32_t)(pktheader->len);
     fprintf(stdout, "\nPacket number: %d  Packet Len: %u\n\n", pktnum, pktlen);
 }
 
-void print_ethhdr(struct ethernet* ethheader) {
+void print_ethhdr(struct ethernet* ethheader) 
+{
     char* dst_str = ether_ntoa(&ethheader->dst);
     char* src_str = ether_ntoa(&ethheader->src);
     char* ether_type = determine_ether_type(ethheader->type);
-    fprintf(stdout, "\tEthernet Header\n\t\tDest MAC: %s\n\t\tSource MAC: %s\n\t\tType: %s\n", 
+    fprintf(stdout, "\tEthernet Header\n\t\tDest MAC: %s\n\t\tSource MAC: %s\n\t\tType: %s\n\n", 
                                             dst_str,          src_str,            ether_type);
 }
 
-char* determine_ether_type(uint16_t type) {
+char* determine_ether_type(uint16_t type_network) 
+{
     /* convert type from network to host order */
-    uint16_t type_host = ntohs(type);          
+    uint16_t type_host = ntohs(type_network);
     switch(type_host)
     {
         case ETHER_TYPE_IP:
@@ -57,4 +60,15 @@ char* determine_ether_type(uint16_t type) {
         default:
             return "Unknown";
     }
+}
+
+void* safe_malloc(size_t size) 
+{
+    void* result = malloc(size);
+    if(result == NULL) 
+    {
+        perror("safe_malloc failed! : ");
+        exit(EXIT_FAILURE);
+    }
+    return result;
 }
