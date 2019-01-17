@@ -63,6 +63,14 @@ struct ip
     /* uint32_t options; */
 }__attribute__((packed));
 
+struct icmp
+{/* 8 bytes */
+    uint8_t type;              /* ICMP type */
+    uint8_t code;              /* ICMP subtype */
+    uint16_t checksum;
+    uint32_t rest_of_header;   /* based on type and subtype */
+}__attribute__((packed));
+
 struct tcp
 {/* 20 bytes min */
     uint16_t src_port;         /* sending port */
