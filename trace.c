@@ -30,11 +30,13 @@ int main(int argc, char* argv[])
             case ETHER_TYPE_ARP:
                 arpheader = (struct arp*)(pktdata + ETH_SIZE);
                 print_arphdr(arpheader);
+                break;
             case ETHER_TYPE_IP:
                 ipheader = (struct ip*)(pktdata + ETH_SIZE);
                 print_iphdr(ipheader);
+                break;
             default:
-                continue;
+                break;
         }
     }
 
@@ -113,13 +115,18 @@ void print_iphdr(struct ip* ipheader)
     uint8_t diffserv = (ipheader->TOS) >> 2;
     uint8_t ECN = (ipheader->TOS) & IP_ECN_MASK;
     char* protocol = determine_ip_protocol(ipheader->protocol);
-    uint16_t checksum = in_cksum(ipheader, header_len);
-    char* check = (checksum == ipheader->checksum) ? "Correct" : "Incorrect";
+    /* determine checksum correctness */
+    uint16_t checksum = in_cksum((unsigned short*)ipheader, header_len);
+    char* check = (checksum == 0x0000) ? "Correct" : "Incorrect";
+    /* convert checksum from network to host order */
+    uint16_t checksum_host = ntohs(ipheader->checksum);
     /* ip format buffer for src and dst */
     char* ip_format = NULL;
     ip_format = inet_ntoa(ipheader->src);
-    /* fprintf(stdout, "\tIP Header\n\t\tIP Version: %u\n\t\tHeader Len (bytes): %u\n\t\tTOS subfields:\n\t\t\t") */
+    fprintf(stdout, "\tIP Header\n\t\tIP Version: %u\n\t\tHeader Len (bytes): %u\n\t\tTOS subfields:\n\t\t   Diffserv bits: %u\n\t\t   ECN bits: %u\n\t\tTTL: %u\n\t\tProtocol: %s\n\t\tChecksum: %s (0x%04x)\n\t\tSender IP: %s\n", 
+                                      version,            header_len,                                        diffserv,                 ECN,              ipheader->TTL, protocol,       check, checksum_host, ip_format);
     ip_format = inet_ntoa(ipheader->dst);
+    fprintf(stdout, "\t\tDest IP: %s\n\n", ip_format);
 }
 
 char* determine_ip_protocol(uint8_t protocol)
