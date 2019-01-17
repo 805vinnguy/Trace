@@ -13,8 +13,8 @@
 
 struct ethernet 
 {/* 14 bytes */
-    struct ether_addr src;     /* source MAC */
     struct ether_addr dst;     /* destination MAC */
+    struct ether_addr src;     /* source MAC */
     uint16_t type;             /* next protocol */
 }__attribute__((packed));
 

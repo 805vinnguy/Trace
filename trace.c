@@ -24,7 +24,6 @@ int main(int argc, char* argv[])
         pktnum++;
         print_pkthdr(pktnum, pktheader);
         ethheader = (struct ethernet*)(pktdata);
-        
         print_ethhdr(ethheader);
     }
 
@@ -40,11 +39,13 @@ void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader)
 
 void print_ethhdr(struct ethernet* ethheader) 
 {
-    char* dst_str = ether_ntoa(&ethheader->dst);
-    char* src_str = ether_ntoa(&ethheader->src);
+    /* mac format buffer for dst and src */
+    char* mac_format = NULL; 
     char* ether_type = determine_ether_type(ethheader->type);
-    fprintf(stdout, "\tEthernet Header\n\t\tDest MAC: %s\n\t\tSource MAC: %s\n\t\tType: %s\n\n", 
-                                            dst_str,          src_str,            ether_type);
+    mac_format = ether_ntoa(&ethheader->dst);
+    fprintf(stdout, "\tEthernet Header\n\t\tDest MAC: %s\n", mac_format);
+    mac_format = ether_ntoa(&ethheader->src);
+    fprintf(stdout, "\t\tSource MAC: %s\n\t\tType: %s\n\n", mac_format, ether_type);
 }
 
 char* determine_ether_type(uint16_t type_network) 
