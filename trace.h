@@ -10,6 +10,7 @@
 #include <netinet/ether.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "checksum.h"
 
 struct ethernet 
 {/* 14 bytes */
@@ -56,10 +57,10 @@ struct ip
     uint16_t id;               
     uint16_t flags_frag;
     uint8_t TTL;               /* time to live */
-    uint8_t next_protocol;
+    uint8_t protocol;          /* next protocol */
     uint16_t checksum;
-    uint32_t src;              /* sender ip */
-    uint32_t dst;              /* receiver ip */
+    struct in_addr src;        /* sender ip */
+    struct in_addr dst;        /* receiver ip */
     /* uint32_t options; */
 }__attribute__((packed));
 
@@ -104,12 +105,20 @@ struct udp
 #define ARP_REQUEST 0x0001
 #define ARP_REPLY 0x0002
 
+#define IP_IHL_MASK 0x000F
+#define IP_ECN_MASK 0x0003
+#define IP_PROTO_ICMP 0x01
+#define IP_PROTO_TCP 0x06
+#define IP_PROTO_UDP 0x11
+#define IP_IHL_LEN 4
+
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
 void print_ethhdr(struct ethernet* ethheader);
     char* determine_ether_type(uint16_t type_network);
 void print_arphdr(struct arp* arpheader);
     char* determine_arp_oper(uint16_t oper_network);
 void print_iphdr(struct ip* ipheader);
+    char* determine_ip_protocol(uint8_t protocol);
 
 void* safe_malloc(size_t size);
 

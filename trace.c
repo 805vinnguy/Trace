@@ -107,7 +107,34 @@ char* determine_arp_oper(uint16_t oper_network)
 
 void print_iphdr(struct ip* ipheader)
 {
-    
+    uint8_t version = (ipheader->ver_IHL) >> 4;
+    uint8_t IHL = (ipheader->ver_IHL) & IP_IHL_MASK;
+    uint8_t header_len = IHL * IP_IHL_LEN;
+    uint8_t diffserv = (ipheader->TOS) >> 2;
+    uint8_t ECN = (ipheader->TOS) & IP_ECN_MASK;
+    char* protocol = determine_ip_protocol(ipheader->protocol);
+    uint16_t checksum = in_cksum(ipheader, header_len);
+    char* check = (checksum == ipheader->checksum) ? "Correct" : "Incorrect";
+    /* ip format buffer for src and dst */
+    char* ip_format = NULL;
+    ip_format = inet_ntoa(ipheader->src);
+    /* fprintf(stdout, "\tIP Header\n\t\tIP Version: %u\n\t\tHeader Len (bytes): %u\n\t\tTOS subfields:\n\t\t\t") */
+    ip_format = inet_ntoa(ipheader->dst);
+}
+
+char* determine_ip_protocol(uint8_t protocol)
+{
+    switch(protocol)
+    {
+        case IP_PROTO_ICMP:
+            return "ICMP";
+        case IP_PROTO_TCP:
+            return "TCP";
+        case IP_PROTO_UDP:
+            return "UDP";
+        default:
+            return "Unknown";
+    }
 }
 
 void* safe_malloc(size_t size) 
