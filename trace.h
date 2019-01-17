@@ -115,10 +115,11 @@ struct udp
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
 void print_ethhdr(struct ethernet* ethheader);
     char* determine_ether_type(uint16_t type_network);
-void print_arphdr(struct arp* arpheader);
-    char* determine_arp_oper(uint16_t oper_network);
-void print_iphdr(struct ip* ipheader);
-    char* determine_ip_protocol(uint8_t protocol);
+void print_ether_type(uint16_t type, const u_char* pktdata);
+    void print_arphdr(struct arp* arpheader);
+        char* determine_arp_oper(uint16_t oper_network);
+    void print_iphdr(struct ip* ipheader);
+        char* determine_ip_protocol(uint8_t protocol);
 void print_ip_protocol(struct ip* ipheader);
 
 void* safe_malloc(size_t size);

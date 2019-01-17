@@ -8,8 +8,6 @@ int main(int argc, char* argv[])
     const u_char* pktdata = NULL;
     int pktnum = 0;
     struct ethernet* ethheader = NULL;
-    struct arp* arpheader = NULL;
-    struct ip* ipheader = NULL;
     /* struct icmp* icmpheader = NULL;
     struct tcp* tcpheader = NULL;
     struct udp* udpheader = NULL; */
@@ -26,19 +24,7 @@ int main(int argc, char* argv[])
         print_pkthdr(pktnum, pktheader);
         ethheader = (struct ethernet*)(pktdata);
         print_ethhdr(ethheader);
-        switch(ntohs(ethheader->type))
-        {
-            case ETHER_TYPE_ARP:
-                arpheader = (struct arp*)(pktdata + ETH_SIZE);
-                print_arphdr(arpheader);
-                break;
-            case ETHER_TYPE_IP:
-                ipheader = (struct ip*)(pktdata + ETH_SIZE);
-                print_iphdr(ipheader);
-                break;
-            default:
-                break;
-        }
+        print_ether_type(ethheader->type, pktdata);
     }
 
     pcap_close(tracefile);
@@ -74,6 +60,25 @@ char* determine_ether_type(uint16_t type_network)
             return "IP";
         default:
             return "Unknown";
+    }
+}
+
+void print_ether_type(uint16_t type, const u_char* pktdata)
+{
+    struct arp* arpheader = NULL;
+    struct ip* ipheader = NULL;
+    switch(ntohs(type))
+    {
+        case ETHER_TYPE_ARP:
+            arpheader = (struct arp*)(pktdata + ETH_SIZE);
+            print_arphdr(arpheader);
+            break;
+        case ETHER_TYPE_IP:
+            ipheader = (struct ip*)(pktdata + ETH_SIZE);
+            print_iphdr(ipheader);
+            break;
+        default:
+            break;
     }
 }
 
@@ -151,7 +156,7 @@ char* determine_ip_protocol(uint8_t protocol)
 
 void print_ip_protocol(struct ip* ipheader)
 {
-    
+
 }
 
 void* safe_malloc(size_t size) 
