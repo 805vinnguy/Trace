@@ -119,6 +119,7 @@ void print_arphdr(struct arp* arpheader);
     char* determine_arp_oper(uint16_t oper_network);
 void print_iphdr(struct ip* ipheader);
     char* determine_ip_protocol(uint8_t protocol);
+void print_ip_protocol(struct ip* ipheader);
 
 void* safe_malloc(size_t size);
 

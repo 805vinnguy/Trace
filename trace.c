@@ -10,7 +10,8 @@ int main(int argc, char* argv[])
     struct ethernet* ethheader = NULL;
     struct arp* arpheader = NULL;
     struct ip* ipheader = NULL;
-    /* struct tcp* tcpheader = NULL;
+    /* struct icmp* icmpheader = NULL;
+    struct tcp* tcpheader = NULL;
     struct udp* udpheader = NULL; */
 
     tracefile = pcap_open_offline(argv[1], (char*)frame_buf);
@@ -123,8 +124,12 @@ void print_iphdr(struct ip* ipheader)
     /* ip format buffer for src and dst */
     char* ip_format = NULL;
     ip_format = inet_ntoa(ipheader->src);
-    fprintf(stdout, "\tIP Header\n\t\tIP Version: %u\n\t\tHeader Len (bytes): %u\n\t\tTOS subfields:\n\t\t   Diffserv bits: %u\n\t\t   ECN bits: %u\n\t\tTTL: %u\n\t\tProtocol: %s\n\t\tChecksum: %s (0x%04x)\n\t\tSender IP: %s\n", 
-                                      version,            header_len,                                        diffserv,                 ECN,              ipheader->TTL, protocol,       check, checksum_host, ip_format);
+    fprintf(stdout, "\tIP Header\n\t\t"
+                    "IP Version: %u\n\t\tHeader Len (bytes): %u\n\t\tTOS subfields:\n\t\t"
+                    "   Diffserv bits: %u\n\t\t   ECN bits: %u\n\t\tTTL: %u\n\t\t"
+                    "Protocol: %s\n\t\tChecksum: %s (0x%04x)\n\t\tSender IP: %s\n", 
+                     version, header_len, diffserv, ECN, ipheader->TTL, protocol, 
+                     check, checksum_host, ip_format);
     ip_format = inet_ntoa(ipheader->dst);
     fprintf(stdout, "\t\tDest IP: %s\n\n", ip_format);
 }
@@ -142,6 +147,11 @@ char* determine_ip_protocol(uint8_t protocol)
         default:
             return "Unknown";
     }
+}
+
+void print_ip_protocol(struct ip* ipheader)
+{
+    
 }
 
 void* safe_malloc(size_t size) 
