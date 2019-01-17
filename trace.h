@@ -18,6 +18,14 @@ struct ethernet
     uint16_t type;             /* next protocol */
 }__attribute__((packed));
 
+/* 
+    Defined in <net/ethernet.h>
+    struct ether_addr
+    {
+        uint8_t ether_addr_octet[6];
+    };
+*/
+
 struct arp
 {/* 28 bytes */
     uint16_t htype;            /* hardware type */
@@ -25,11 +33,20 @@ struct arp
     uint8_t hLen;              /* hardware address length */
     uint8_t pLen;              /* protocol address length */
     uint16_t oper;             /* operation */
-    uint8_t sha[6];            /* sender hardware address */
-    uint8_t spa[4];            /* sender protocol address */
-    uint8_t tha[6];            /* target hardware address */
-    uint8_t tpa[4];            /* target protocol address */
+    struct ether_addr sha;     /* sender hardware address */
+    struct in_addr spa;        /* sender protocol address */
+    struct ether_addr tha;     /* target hardware address */
+    struct in_addr tpa;        /* target protocol address */
 }__attribute__((packed));
+
+/* 
+    Defined in <netinet/in.h>
+    typedef uint32_t in_addr_t
+    struct in_addr
+    {
+        in_addr_t s_addr;
+    };
+*/
 
 struct ip
 {/* 20 bytes min */
@@ -76,9 +93,15 @@ struct udp
 #define ETHER_TYPE_IP 0x0800
 #define ETHER_TYPE_ARP 0x0806
 
+#define ARP_REQUEST 0x0001
+#define ARP_REPLY 0x0002
+
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
 void print_ethhdr(struct ethernet* ethheader);
     char* determine_ether_type(uint16_t type_network);
+void print_arphdr(struct arp* arpheader);
+    char* determine_arp_oper(uint16_t oper_network);
+void print_iphdr(struct ip* ipheader);
 
 void* safe_malloc(size_t size);
 

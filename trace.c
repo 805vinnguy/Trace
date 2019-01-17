@@ -8,9 +8,9 @@ int main(int argc, char* argv[])
     const u_char* pktdata = NULL;
     int pktnum = 0;
     struct ethernet* ethheader = NULL;
-    /* struct arp* arpheader = NULL;
+    struct arp* arpheader = NULL;
     struct ip* ipheader = NULL;
-    struct tcp* tcpheader = NULL;
+    /* struct tcp* tcpheader = NULL;
     struct udp* udpheader = NULL; */
 
     tracefile = pcap_open_offline(argv[1], (char*)frame_buf);
@@ -25,6 +25,17 @@ int main(int argc, char* argv[])
         print_pkthdr(pktnum, pktheader);
         ethheader = (struct ethernet*)(pktdata);
         print_ethhdr(ethheader);
+        switch(ntohs(ethheader->type))
+        {
+            case ETHER_TYPE_ARP:
+                arpheader = (struct arp*)(pktdata + ETH_SIZE);
+                print_arphdr(arpheader);
+            case ETHER_TYPE_IP:
+                ipheader = (struct ip*)(pktdata + ETH_SIZE);
+                print_iphdr(ipheader);
+            default:
+                continue;
+        }
     }
 
     pcap_close(tracefile);
@@ -54,13 +65,49 @@ char* determine_ether_type(uint16_t type_network)
     uint16_t type_host = ntohs(type_network);
     switch(type_host)
     {
-        case ETHER_TYPE_IP:
-            return "IP";
         case ETHER_TYPE_ARP:
             return "ARP";
+        case ETHER_TYPE_IP:
+            return "IP";
         default:
             return "Unknown";
     }
+}
+
+void print_arphdr(struct arp* arpheader)
+{
+    char* oper = determine_arp_oper(arpheader->oper);
+    /* mac format buffer for sha and tha*/
+    char* mac_format = NULL;
+    /* ip format buffer for spa and tpa */
+    char* ip_format = NULL;
+    mac_format = ether_ntoa(&arpheader->sha);
+    ip_format = inet_ntoa(arpheader->spa);
+    fprintf(stdout, "\tARP header\n\t\tOpcode: %s\n\t\tSender MAC: %s\n\t\tSender IP: %s\n",
+                                       oper,           mac_format,         ip_format);
+    mac_format = ether_ntoa(&arpheader->tha);
+    ip_format = inet_ntoa(arpheader->tpa);
+    fprintf(stdout, "\t\tTarget MAC: %s\n\t\tTarget IP: %s\n\n", 
+                         mac_format,         ip_format);
+}
+
+char* determine_arp_oper(uint16_t oper_network) 
+{
+    uint16_t oper_host = ntohs(oper_network);
+    switch(oper_host)
+    {
+        case ARP_REQUEST:
+            return "Request";
+        case ARP_REPLY:
+            return "Reply";
+        default:
+            return "Unknown";
+    }
+}
+
+void print_iphdr(struct ip* ipheader)
+{
+    
 }
 
 void* safe_malloc(size_t size) 
