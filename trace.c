@@ -49,15 +49,12 @@ char* determine_ether_type(uint16_t type_network)
 {
     /* convert type from network to host order */
     uint16_t type_host = ntohs(type_network);
-    switch(type_host)
-    {
-        case ETHER_TYPE_ARP:
-            return "ARP";
-        case ETHER_TYPE_IP:
-            return "IP";
-        default:
-            return "Unknown";
-    }
+    if(type_host == ETHER_TYPE_ARP)
+        return "ARP";
+    else if(type_host == ETHER_TYPE_IP)
+        return "IP";
+    else
+        return "Unknown";
 }
 
 void print_ether_type(uint16_t type, const u_char* pktdata)
@@ -100,15 +97,12 @@ void print_arphdr(struct arp* arpheader)
 char* determine_arp_oper(uint16_t oper_network) 
 {
     uint16_t oper_host = ntohs(oper_network);
-    switch(oper_host)
-    {
-        case ARP_REQUEST:
-            return "Request";
-        case ARP_REPLY:
-            return "Reply";
-        default:
-            return "Unknown";
-    }
+    if(oper_host == ARP_REQUEST)
+        return "Request";
+    else if(oper_host == ARP_REPLY)
+        return "Reply";
+    else
+        return "Unknown";
 }
 
 void print_iphdr(struct ip* ipheader)
@@ -139,17 +133,14 @@ void print_iphdr(struct ip* ipheader)
 
 char* determine_ip_protocol(uint8_t protocol)
 {
-    switch(protocol)
-    {
-        case IP_PROTO_ICMP:
-            return "ICMP";
-        case IP_PROTO_TCP:
-            return "TCP";
-        case IP_PROTO_UDP:
-            return "UDP";
-        default:
-            return "Unknown";
-    }
+    if(protocol == IP_PROTO_ICMP)
+        return "ICMP";
+    else if(protocol == IP_PROTO_TCP)
+        return "TCP";
+    else if(protocol == IP_PROTO_UDP)
+        return "UDP";
+    else
+        return "Unknown";
 }
 
 void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
@@ -179,18 +170,12 @@ void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
 
 void print_icmphdr(struct icmp* icmpheader)
 {
-    switch(icmpheader->type)
-    {
-        case ICMP_ECHO_REQUEST:
-            fprintf(stdout, "\n\tICMP Header\n\t\tType: %s\n", "Request");
-            break;
-        case ICMP_ECHO_REPLY:
-            fprintf(stdout, "\n\tICMP Header\n\t\tType: %s\n", "Reply");
-            break;
-        default:
-            fprintf(stdout, "\n\tICMP Header\n\t\tType: %u\n", icmpheader->type);
-            break;
-    }
+    if(icmpheader->type == ICMP_ECHO_REQUEST)
+        fprintf(stdout, "\n\tICMP Header\n\t\tType: %s\n", "Request");
+    else if(icmpheader->type == ICMP_ECHO_REPLY)
+        fprintf(stdout, "\n\tICMP Header\n\t\tType: %s\n", "Reply");
+    else
+        fprintf(stdout, "\n\tICMP Header\n\t\tType: %u\n", icmpheader->type);
 }
 
 void print_tcphdr(struct tcp* tcpheader)
@@ -200,7 +185,35 @@ void print_tcphdr(struct tcp* tcpheader)
 
 void print_udphdr(struct udp* udpheader)
 {
+    char* src = determine_port(udpheader->src_port);
+    char* dst = determine_port(udpheader->dst_port);
+    fprintf(stdout, "\n\tUDP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n", src, dst);
+}
 
+char* determine_port(uint16_t port_network)
+{
+    /* convert port from network to host order */
+    uint16_t port_host = ntohs(port_network);
+    char* port_num = safe_malloc(sizeof(char) * 6);
+    if(sprintf(port_num, "%u", port_host) < 0)
+    {
+        perror("sprintf in determine_port failed! : ");
+        exit(EXIT_FAILURE);
+    }
+    if(port_host == PORT_DNS)
+        return "DNS";
+    else if(port_host == PORT_HTTP)
+        return "HTTP";
+    else if(port_host == PORT_TELNET)
+        return "Telnet";
+    else if(port_host == PORT_FTP)
+        return "FTP";
+    else if(port_host == PORT_POP3)
+        return "POP3";
+    else if(port_host == PORT_SMTP)
+        return "SMTP";
+    else
+        return port_num;
 }
 
 void* safe_malloc(size_t size) 
