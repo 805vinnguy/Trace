@@ -76,6 +76,7 @@ void print_ether_type(uint16_t type, const u_char* pktdata)
         case ETHER_TYPE_IP:
             ipheader = (struct ip*)(pktdata + ETH_SIZE);
             print_iphdr(ipheader);
+            print_ip_protocol(ipheader->protocol, pktdata, ipheader->ver_IHL & IP_IHL_MASK);
             break;
         default:
             break;
@@ -117,7 +118,7 @@ void print_iphdr(struct ip* ipheader)
 {
     uint8_t version = (ipheader->ver_IHL) >> 4;
     uint8_t IHL = (ipheader->ver_IHL) & IP_IHL_MASK;
-    uint8_t header_len = IHL * IP_IHL_LEN;
+    uint32_t header_len = IHL * IP_IHL_LEN;
     uint8_t diffserv = (ipheader->TOS) >> 2;
     uint8_t ECN = (ipheader->TOS) & IP_ECN_MASK;
     char* protocol = determine_ip_protocol(ipheader->protocol);
@@ -154,9 +155,38 @@ char* determine_ip_protocol(uint8_t protocol)
     }
 }
 
-void print_ip_protocol(struct ip* ipheader)
+void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
 {
+    uint32_t ip_header_len = IHL * IP_IHL_LEN;
+    struct icmp* icmpheader = NULL;
+    switch(protocol)
+    {
+        case IP_PROTO_ICMP:
+            icmpheader = (struct icmp*)(pktdata + ETH_SIZE + ip_header_len);
+            print_icmphdr(icmpheader);
+            break;
+        case IP_PROTO_TCP:
+            break;
+        case IP_PROTO_UDP:
+            break;
+        default:
+            break;
+    }
+}
 
+void print_icmphdr(struct icmp* icmpheader)
+{
+    switch(icmpheader->type)
+    {
+        case ICMP_ECHO_REQUEST:
+            fprintf(stdout, "\tICMP Header\n\t\tType: %s\n", "Request");
+            break;
+        case ICMP_ECHO_REPLY:
+            fprintf(stdout, "\tICMP Header\n\t\tType: %s\n", "Reply");
+            break;
+        default:
+            break;
+    }
 }
 
 void* safe_malloc(size_t size) 
