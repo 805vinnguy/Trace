@@ -188,32 +188,40 @@ void print_udphdr(struct udp* udpheader)
     char* src = determine_port(udpheader->src_port);
     char* dst = determine_port(udpheader->dst_port);
     fprintf(stdout, "\n\tUDP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n", src, dst);
+    free(src);
+    free(dst);
 }
 
 char* determine_port(uint16_t port_network)
 {
     /* convert port from network to host order */
     uint16_t port_host = ntohs(port_network);
-    char* port_num = safe_malloc(sizeof(char) * 6);
-    if(sprintf(port_num, "%u", port_host) < 0)
+    char* port_num = safe_malloc(sizeof(char) * 7);
+    if(port_host == PORT_DNS)
+        strncpy(port_num, "DNS", 4);
+    else if(port_host == PORT_HTTP)
+        strncpy(port_num, "HTTP", 5);
+    else if(port_host == PORT_TELNET)
+        strncpy(port_num, "Telnet", 7);
+    else if(port_host == PORT_FTP)
+        strncpy(port_num, "FTP", 4);
+    else if(port_host == PORT_POP3)
+        strncpy(port_num, "POP3", 5);
+    else if(port_host == PORT_SMTP)
+        strncpy(port_num, "SMTP", 5);
+    else
+        port_num = safe_sprintf(port_num, port_host);
+    return port_num;
+}
+
+char* safe_sprintf(char* str, uint16_t num)
+{
+    if(sprintf(str, "%u", num) < 0)
     {
-        perror("sprintf in determine_port failed! : ");
+        perror("sprintf failed! : ");
         exit(EXIT_FAILURE);
     }
-    if(port_host == PORT_DNS)
-        return "DNS";
-    else if(port_host == PORT_HTTP)
-        return "HTTP";
-    else if(port_host == PORT_TELNET)
-        return "Telnet";
-    else if(port_host == PORT_FTP)
-        return "FTP";
-    else if(port_host == PORT_POP3)
-        return "POP3";
-    else if(port_host == PORT_SMTP)
-        return "SMTP";
-    else
-        return port_num;
+    return str;
 }
 
 void* safe_malloc(size_t size) 
