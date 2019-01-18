@@ -115,6 +115,13 @@ struct udp
 #define ICMP_ECHO_REQUEST 8
 #define ICMP_ECHO_REPLY 0
 
+#define PORT_DNS 53
+#define PORT_HTTP 80
+#define PORT_TELNET 23
+#define PORT_FTP 21
+#define PORT_POP3 110
+#define PORT_SMTP 25
+
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
 void print_ethhdr(struct ethernet* ethheader);
     char* determine_ether_type(uint16_t type_network);
