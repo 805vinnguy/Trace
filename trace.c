@@ -137,7 +137,7 @@ void print_iphdr(struct ip* ipheader)
                      version, header_len, diffserv, ECN, ipheader->TTL, protocol, 
                      check, checksum_host, ip_format);
     ip_format = inet_ntoa(ipheader->dst);
-    fprintf(stdout, "\t\tDest IP: %s\n\n", ip_format);
+    fprintf(stdout, "\t\tDest IP: %s\n", ip_format);
 }
 
 char* determine_ip_protocol(uint8_t protocol)
@@ -179,12 +179,13 @@ void print_icmphdr(struct icmp* icmpheader)
     switch(icmpheader->type)
     {
         case ICMP_ECHO_REQUEST:
-            fprintf(stdout, "\tICMP Header\n\t\tType: %s\n", "Request");
+            fprintf(stdout, "\n\tICMP Header\n\t\tType: %s\n", "Request");
             break;
         case ICMP_ECHO_REPLY:
-            fprintf(stdout, "\tICMP Header\n\t\tType: %s\n", "Reply");
+            fprintf(stdout, "\n\tICMP Header\n\t\tType: %s\n", "Reply");
             break;
         default:
+            fprintf(stdout, "\n\tICMP Header\n\t\tType: %u\n", icmpheader->type);
             break;
     }
 }
