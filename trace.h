@@ -125,6 +125,8 @@ void print_ether_type(uint16_t type, const u_char* pktdata);
         char* determine_ip_protocol(uint8_t protocol);
 void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL);
     void print_icmphdr(struct icmp* icmpheader);
+    void print_tcphdr(struct tcp* tcpheader);
+    void print_udphdr(struct udp* udpheader);
 
 void* safe_malloc(size_t size);
 

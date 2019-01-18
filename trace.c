@@ -8,9 +8,6 @@ int main(int argc, char* argv[])
     const u_char* pktdata = NULL;
     int pktnum = 0;
     struct ethernet* ethheader = NULL;
-    /* struct icmp* icmpheader = NULL;
-    struct tcp* tcpheader = NULL;
-    struct udp* udpheader = NULL; */
 
     tracefile = pcap_open_offline(argv[1], (char*)frame_buf);
     if(tracefile == NULL) 
@@ -159,6 +156,8 @@ void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
 {
     uint32_t ip_header_len = IHL * IP_IHL_LEN;
     struct icmp* icmpheader = NULL;
+    struct tcp* tcpheader = NULL;
+    struct udp* udpheader = NULL;
     switch(protocol)
     {
         case IP_PROTO_ICMP:
@@ -166,8 +165,12 @@ void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
             print_icmphdr(icmpheader);
             break;
         case IP_PROTO_TCP:
+            tcpheader = (struct tcp*)(pktdata + ETH_SIZE + ip_header_len);
+            print_tcphdr(tcpheader);
             break;
         case IP_PROTO_UDP:
+            udpheader = (struct udp*)(pktdata + ETH_SIZE + ip_header_len);
+            print_udphdr(udpheader);
             break;
         default:
             break;
@@ -188,6 +191,16 @@ void print_icmphdr(struct icmp* icmpheader)
             fprintf(stdout, "\n\tICMP Header\n\t\tType: %u\n", icmpheader->type);
             break;
     }
+}
+
+void print_tcphdr(struct tcp* tcpheader)
+{
+
+}
+
+void print_udphdr(struct udp* udpheader)
+{
+
 }
 
 void* safe_malloc(size_t size) 
