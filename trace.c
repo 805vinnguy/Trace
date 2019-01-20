@@ -4,17 +4,31 @@ int main(int argc, char* argv[])
 {
     unsigned char frame_buf[PCAP_ERRBUF_SIZE];
     pcap_t* tracefile = NULL;
-    struct pcap_pkthdr* pktheader = NULL;
-    const u_char* pktdata = NULL;
-    int pktnum = 0;
-    struct ethernet* ethheader = NULL;
 
     tracefile = pcap_open_offline(argv[1], (char*)frame_buf);
     if(tracefile == NULL) 
     {
         fprintf(stderr, "%s\n", frame_buf);
-        exit(EXIT_FAILURE);
+        usage();
     }
+    print_packets(tracefile);
+
+    pcap_close(tracefile);
+    exit(EXIT_SUCCESS);
+}
+
+void usage(void)
+{
+    fprintf(stderr, "Usage: ./trace filepath [.pcap]\n");
+    exit(EXIT_FAILURE);
+}
+
+void print_packets(pcap_t* tracefile)
+{
+    struct pcap_pkthdr* pktheader = NULL;
+    const u_char* pktdata = NULL;
+    int pktnum = 0;
+    struct ethernet* ethheader = NULL;
     while(pcap_next_ex(tracefile, &pktheader, &pktdata) != -2)
     {
         pktnum++;
@@ -23,9 +37,6 @@ int main(int argc, char* argv[])
         print_ethhdr(ethheader);
         print_ether_type(ethheader->type, pktdata);
     }
-
-    pcap_close(tracefile);
-    exit(EXIT_SUCCESS);
 }
 
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader) 

@@ -137,6 +137,8 @@ struct udp
 #define TCP_FLAG_MASK_FIN 0x01
 #define TCP_FLAG_MASK_ACK 0x10
 
+void usage(void);
+void print_packets(pcap_t* tracefile);
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
 void print_ethhdr(struct ethernet* ethheader);
     char* determine_ether_type(uint16_t type_network);
