@@ -5,6 +5,8 @@ int main(int argc, char* argv[])
     unsigned char frame_buf[PCAP_ERRBUF_SIZE];
     pcap_t* tracefile = NULL;
 
+    if(argc < 2)
+        usage();
     tracefile = pcap_open_offline(argv[1], (char*)frame_buf);
     if(tracefile == NULL) 
     {
@@ -12,7 +14,6 @@ int main(int argc, char* argv[])
         usage();
     }
     print_packets(tracefile);
-
     pcap_close(tracefile);
     exit(EXIT_SUCCESS);
 }
