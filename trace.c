@@ -230,8 +230,7 @@ struct tcp_pseudo* get_tcp_pseudo(struct tcp* tcpheader, struct ip* ipheader)
     memcpy(&(pseudo->dst), &(ipheader->dst), sizeof(struct in_addr));
     pseudo->zeros = 0;
     memcpy(&(pseudo->protocol), &(ipheader->protocol), sizeof(uint8_t));
-    uint16_t tcp_len_network = get_tcp_len(tcpheader, ipheader);
-    memcpy(&(pseudo->tcp_len), &tcp_len_network, sizeof(uint16_t));
+    pseudo->tcp_len = get_tcp_len(tcpheader, ipheader);
     return pseudo;
 }
 
