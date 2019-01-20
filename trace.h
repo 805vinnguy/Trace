@@ -136,6 +136,7 @@ struct udp
 #define TCP_FLAG_MASK_RST 0x04
 #define TCP_FLAG_MASK_FIN 0x01
 #define TCP_FLAG_MASK_ACK 0x10
+#define TCP_PSEUDO_LEN 12
 
 void usage(void);
 void print_packets(pcap_t* tracefile);
@@ -147,10 +148,12 @@ void print_ether_type(uint16_t type, const u_char* pktdata);
         char* determine_arp_oper(uint16_t oper_network);
     void print_iphdr(struct ip* ipheader);
         char* determine_ip_protocol(uint8_t protocol);
-void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL);
+void print_ip_protocol(struct ip* ipheader, const u_char* pktdata);
     void print_icmphdr(struct icmp* icmpheader);
-    void print_tcphdr(struct tcp* tcpheader);
+    void print_tcphdr(struct tcp* tcpheader, struct ip* ipheader);
         char* get_flags(uint16_t offset_res_flags);
+        struct tcp_pseudo* get_tcp_pseudo(struct tcp* tcpheader, struct ip* ipheader);
+        uint16_t get_tcp_len(struct tcp* tcpheader, struct ip* ipheader);
     void print_udphdr(struct udp* udpheader);
         char* determine_port(uint16_t port_network);
 

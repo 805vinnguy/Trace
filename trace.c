@@ -81,7 +81,7 @@ void print_ether_type(uint16_t type, const u_char* pktdata)
         case ETHER_TYPE_IP:
             ipheader = (struct ip*)(pktdata + ETH_SIZE);
             print_iphdr(ipheader);
-            print_ip_protocol(ipheader->protocol, pktdata, ipheader->ver_IHL & IP_IHL_MASK);
+            print_ip_protocol(ipheader, pktdata);
             break;
         default:
             break;
@@ -154,13 +154,13 @@ char* determine_ip_protocol(uint8_t protocol)
         return "Unknown";
 }
 
-void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
+void print_ip_protocol(struct ip* ipheader, const u_char* pktdata)
 {
-    uint32_t ip_header_len = IHL * WORD_LEN;
+    uint32_t ip_header_len = (ipheader->ver_IHL & IP_IHL_MASK) * WORD_LEN;
     struct icmp* icmpheader = NULL;
     struct tcp* tcpheader = NULL;
     struct udp* udpheader = NULL;
-    switch(protocol)
+    switch(ipheader->protocol)
     {
         case IP_PROTO_ICMP:
             icmpheader = (struct icmp*)(pktdata + ETH_SIZE + ip_header_len);
@@ -168,7 +168,7 @@ void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
             break;
         case IP_PROTO_TCP:
             tcpheader = (struct tcp*)(pktdata + ETH_SIZE + ip_header_len);
-            print_tcphdr(tcpheader);
+            print_tcphdr(tcpheader, ipheader);
             break;
         case IP_PROTO_UDP:
             udpheader = (struct udp*)(pktdata + ETH_SIZE + ip_header_len);
@@ -189,7 +189,7 @@ void print_icmphdr(struct icmp* icmpheader)
         fprintf(stdout, "\n\tICMP Header\n\t\tType: %u\n", icmpheader->type);
 }
 
-void print_tcphdr(struct tcp* tcpheader)
+void print_tcphdr(struct tcp* tcpheader, struct ip* ipheader)
 {
     /* data offset gives size of tcp header */
     char* src_port = determine_port(tcpheader->src_port);
@@ -199,11 +199,19 @@ void print_tcphdr(struct tcp* tcpheader)
     /* format buffer for flags: SYN, RST, FIN, ACK */
     char* flagstr = get_flags(ntohs(tcpheader->offset_res_flags));
     /* checksum as is */
-    fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n\t\tSequence Number: %u\n\t\tACK Number: %u\n\t\tData Offset (bytes): %u\n\t\t%s\n\t\tWindow Size: %u\n\t\t",
-    src_port, dst_port, ntohl(tcpheader->sequence), ntohl(tcpheader->ack), offset_host, flagstr, ntohs(tcpheader->window_size));
+    struct tcp_pseudo* pseudo = get_tcp_pseudo(tcpheader, ipheader);
+
+    uint16_t checksum = in_cksum((unsigned short*)pseudo, ntohs(pseudo->tcp_len) + TCP_PSEUDO_LEN);
+    char* check = (checksum == 0x0000) ? "Correct" : "Incorrect";
+    
+   
+
+    fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n\t\tSequence Number: %u\n\t\tACK Number: %u\n\t\tData Offset (bytes): %u\n\t\t%s\n\t\tWindow Size: %u\n\t\tChecksum: %s (0x%04x)\n",
+    src_port, dst_port, ntohl(tcpheader->sequence), ntohl(tcpheader->ack), offset_host, flagstr, ntohs(tcpheader->window_size), check, ntohs(tcpheader->checksum));
     free(src_port);
     free(dst_port);
     free(flagstr);
+    free(pseudo);
 }
 
 char* get_flags(uint16_t offset_res_flags)
@@ -217,6 +225,37 @@ char* get_flags(uint16_t offset_res_flags)
             "SYN Flag: %s\n\t\tRST Flag: %s\n\t\tFIN Flag: %s\n\t\tACK Flag: %s",
              syn,              rst,              fin,              ack);
     return flagstr;
+}
+
+struct tcp_pseudo* get_tcp_pseudo(struct tcp* tcpheader, struct ip* ipheader)
+{
+    struct tcp_pseudo* pseudo = safe_malloc(sizeof(struct tcp_pseudo));
+    memcpy(&(pseudo->header), tcpheader, sizeof(struct tcp));
+    memcpy(&(pseudo->src), &(ipheader->src), sizeof(struct in_addr));
+    memcpy(&(pseudo->dst), &(ipheader->dst), sizeof(struct in_addr));
+    pseudo->zeros = 0;
+    memcpy(&(pseudo->protocol), &(ipheader->protocol), sizeof(uint8_t));
+    uint16_t tcp_len_network = get_tcp_len(tcpheader, ipheader);
+    memcpy(&(pseudo->tcp_len), &tcp_len_network, sizeof(uint16_t));
+    /* printf("HHH: src: %s\n", inet_ntoa(pseudo->src));
+    printf("HHH: dst: %s\n", inet_ntoa(pseudo->dst));
+    printf("HHH: zer: %u\n", pseudo->zeros);
+    printf("HHH: pro: %u\n", pseudo->protocol);
+    printf("HHH: %u\n", ntohs(pseudo->tcp_len)); */
+    return pseudo;
+}
+
+uint16_t get_tcp_len(struct tcp* tcpheader, struct ip* ipheader)
+{
+    /* uint16_t tcp_header_len = (ntohs(tcpheader->offset_res_flags) >> 12) * WORD_LEN; */
+    uint16_t ip_header_len = ((ipheader->ver_IHL) & IP_IHL_MASK) * WORD_LEN;
+    uint16_t ip_field_length = ntohs(ipheader->length);
+    /* printf("tcp header length: %u\n", tcp_header_len);
+    printf("ip header length: %u\n", ip_header_len);
+    printf("ip field length: %u\n", ip_field_length); */
+    uint16_t tcp_seg_len = ip_field_length - ip_header_len;
+    /* printf("tcp seg len: %u\n", tcp_seg_len); */
+    return htons(tcp_seg_len);
 }
 
 void print_udphdr(struct udp* udpheader)
