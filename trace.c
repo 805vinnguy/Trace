@@ -187,10 +187,12 @@ void print_tcphdr(struct tcp* tcpheader)
     uint16_t offset_host = (ntohs(tcpheader->offset_res_flags) >> 12) * WORD_LEN;
     /* format buffer for flags: SYN, RST, FIN, ACK */
     char* flagstr = get_flags(ntohs(tcpheader->offset_res_flags));
-    /* windowsize as is */
     /* checksum as is */
     fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n\t\tSequence Number: %u\n\t\tACK Number: %u\n\t\tData Offset (bytes): %u\n\t\t%s\n\t\tWindow Size: %u\n\t\t",
     src_port, dst_port, ntohl(tcpheader->sequence), ntohl(tcpheader->ack), offset_host, flagstr, ntohs(tcpheader->window_size));
+    free(src_port);
+    free(dst_port);
+    free(flagstr);
 }
 
 char* get_flags(uint16_t offset_res_flags)
