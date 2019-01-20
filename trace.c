@@ -181,13 +181,19 @@ void print_icmphdr(struct icmp* icmpheader)
 void print_tcphdr(struct tcp* tcpheader)
 {
     /* data offset gives size of tcp header */
-    
+    char* src_port = determine_port(tcpheader->src_port);
+    char* dst_port = determine_port(tcpheader->dst_port);
+    /* seq, ack as is */
+    /* data offset must be ntohs */
+    /* flags need to be masked but as is */
+    /* windowsize as is */
+    /* checksum as is */
 }
 
 void print_udphdr(struct udp* udpheader)
 {
-    char* src = determine_port(udpheader->src_port);
-    char* dst = determine_port(udpheader->dst_port);
+    char* src_port = determine_port(udpheader->src_port);
+    char* dst_port = determine_port(udpheader->dst_port);
     fprintf(stdout, "\n\tUDP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n", src, dst);
     free(src);
     free(dst);

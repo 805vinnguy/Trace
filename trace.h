@@ -132,6 +132,11 @@ struct udp
 #define PORT_POP3 110
 #define PORT_SMTP 25
 
+#define TCP_FLAG_MASK_SYN 0x02
+#define TCP_FLAG_MASK_RST 0x04
+#define TCP_FLAG_MASK_FIN 0x01
+#define TCP_FLAG_MASK_ACK 0x10
+
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
 void print_ethhdr(struct ethernet* ethheader);
     char* determine_ether_type(uint16_t type_network);
