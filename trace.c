@@ -202,8 +202,13 @@ void print_tcphdr(struct tcp* tcpheader, struct ip* ipheader)
     struct tcp_pseudo* pseudo = get_tcp_pseudo(tcpheader, ipheader);
     uint16_t checksum = in_cksum((unsigned short*)pseudo, ntohs(pseudo->tcp_len) + TCP_PSEUDO_LEN);
     char* check = (checksum == 0x0000) ? "Correct" : "Incorrect";
-    fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n\t\tSequence Number: %u\n\t\tACK Number: %u\n\t\tData Offset (bytes): %u\n\t\t%s\n\t\tWindow Size: %u\n\t\tChecksum: %s (0x%04x)\n",
-    src_port, dst_port, ntohl(tcpheader->sequence), ntohl(tcpheader->ack), offset_host, flagstr, ntohs(tcpheader->window_size), check, ntohs(tcpheader->checksum));
+    fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\t"
+                    "Dest Port:  %s\n\t\tSequence Number: %u\n\t\t"
+                    "ACK Number: %u\n\t\tData Offset (bytes): %u\n\t\t"
+                    "%s\n\t\tWindow Size: %u\n\t\tChecksum: %s (0x%04x)\n",
+                    src_port, dst_port, ntohl(tcpheader->sequence), 
+                    ntohl(tcpheader->ack), offset_host, flagstr, 
+                    ntohs(tcpheader->window_size), check, ntohs(tcpheader->checksum));
     free(src_port);
     free(dst_port);
     free(flagstr);
@@ -248,7 +253,8 @@ void print_udphdr(struct udp* udpheader)
 {
     char* src_port = determine_port(udpheader->src_port);
     char* dst_port = determine_port(udpheader->dst_port);
-    fprintf(stdout, "\n\tUDP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n", src_port, dst_port);
+    fprintf(stdout, "\n\tUDP Header\n\t\tSource Port:  %s\n\t\t"
+                    "Dest Port:  %s\n", src_port, dst_port);
     free(src_port);
     free(dst_port);
 }
