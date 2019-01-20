@@ -85,6 +85,16 @@ struct tcp
     /* uint32_t options; */
 }__attribute__((packed));
 
+struct tcp_pseudo
+{/* 32 bytes min */
+    struct in_addr src;        /* sender ip */
+    struct in_addr dst;        /* receiver ip */
+    uint8_t zeros;
+    uint8_t protocol;          /* TCP (0x06) */
+    uint16_t tcp_len;          /* length of TCP header + data */
+    struct tcp header;         /* TCP header */
+}__attribute__((packed));
+
 struct udp
 {/* 8 bytes */
     uint16_t src_port;         /* sending port */

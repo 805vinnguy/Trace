@@ -180,7 +180,8 @@ void print_icmphdr(struct icmp* icmpheader)
 
 void print_tcphdr(struct tcp* tcpheader)
 {
-
+    /* data offset gives size of tcp header */
+    
 }
 
 void print_udphdr(struct udp* udpheader)
