@@ -140,25 +140,43 @@ struct udp
 #define TCP_PSEUDO_LEN 12
 
 void usage(void);
+
 void print_packets(pcap_t* tracefile);
+
 void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader);
+
 void print_ethhdr(struct ethernet* ethheader);
+
     char* determine_ether_type(uint16_t type_network);
+
 void print_ether_type(uint16_t type, const u_char* pktdata);
+
     void print_arphdr(struct arp* arpheader);
+
         char* determine_arp_oper(uint16_t oper_network);
+
     void print_iphdr(struct ip* ipheader);
+
         char* determine_ip_protocol(uint8_t protocol);
+
 void print_ip_protocol(struct ip* ipheader, const u_char* pktdata);
+
     void print_icmphdr(struct icmp* icmpheader);
+
     void print_tcphdr(struct tcp* tcpheader, struct ip* ipheader);
+
         char* get_flags(uint16_t offset_res_flags);
+
         struct tcp_pseudo* get_tcp_pseudo(struct tcp* tcpheader, struct ip* ipheader);
+
         uint16_t get_tcp_len(struct tcp* tcpheader, struct ip* ipheader);
+
     void print_udphdr(struct udp* udpheader);
+
         char* determine_port(uint16_t port_network);
 
 char* safe_sprintf(char* str, uint16_t num);
+
 void* safe_malloc(size_t size);
 
 #endif

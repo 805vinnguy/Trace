@@ -47,18 +47,17 @@ void print_pkthdr(int pktnum, struct pcap_pkthdr* pktheader)
 
 void print_ethhdr(struct ethernet* ethheader) 
 {
-    /* mac format buffer for dst and src */
     char* mac_format = NULL; 
     char* ether_type = determine_ether_type(ethheader->type);
     mac_format = ether_ntoa(&ethheader->dst);
     fprintf(stdout, "\tEthernet Header\n\t\tDest MAC: %s\n", mac_format);
     mac_format = ether_ntoa(&ethheader->src);
-    fprintf(stdout, "\t\tSource MAC: %s\n\t\tType: %s\n\n", mac_format, ether_type);
+    fprintf(stdout, "\t\tSource MAC: %s\n\t\tType: %s\n\n", 
+                    mac_format, ether_type);
 }
 
 char* determine_ether_type(uint16_t type_network) 
 {
-    /* convert type from network to host order */
     uint16_t type_host = ntohs(type_network);
     if(type_host == ETHER_TYPE_ARP)
         return "ARP";
@@ -91,14 +90,13 @@ void print_ether_type(uint16_t type, const u_char* pktdata)
 void print_arphdr(struct arp* arpheader)
 {
     char* oper = determine_arp_oper(arpheader->oper);
-    /* mac format buffer for sha and tha*/
     char* mac_format = NULL;
-    /* ip format buffer for spa and tpa */
     char* ip_format = NULL;
     mac_format = ether_ntoa(&arpheader->sha);
     ip_format = inet_ntoa(arpheader->spa);
-    fprintf(stdout, "\tARP header\n\t\tOpcode: %s\n\t\tSender MAC: %s\n\t\tSender IP: %s\n",
-                                       oper,           mac_format,         ip_format);
+    fprintf(stdout, "\tARP header\n\t\tOpcode: %s\n\t\t"
+                    "Sender MAC: %s\n\t\tSender IP: %s\n",
+                    oper, mac_format, ip_format);
     mac_format = ether_ntoa(&arpheader->tha);
     ip_format = inet_ntoa(arpheader->tpa);
     fprintf(stdout, "\t\tTarget MAC: %s\n\t\tTarget IP: %s\n\n", 
@@ -124,20 +122,17 @@ void print_iphdr(struct ip* ipheader)
     uint8_t diffserv = (ipheader->TOS) >> 2;
     uint8_t ECN = (ipheader->TOS) & IP_ECN_MASK;
     char* protocol = determine_ip_protocol(ipheader->protocol);
-    /* determine checksum correctness */
     uint16_t checksum = in_cksum((unsigned short*)ipheader, header_len);
     char* check = (checksum == 0x0000) ? "Correct" : "Incorrect";
-    /* convert checksum from network to host order */
-    uint16_t checksum_host = ntohs(ipheader->checksum);
-    /* ip format buffer for src and dst */
     char* ip_format = NULL;
     ip_format = inet_ntoa(ipheader->src);
-    fprintf(stdout, "\tIP Header\n\t\t"
-                    "IP Version: %u\n\t\tHeader Len (bytes): %u\n\t\tTOS subfields:\n\t\t"
-                    "   Diffserv bits: %u\n\t\t   ECN bits: %u\n\t\tTTL: %u\n\t\t"
-                    "Protocol: %s\n\t\tChecksum: %s (0x%04x)\n\t\tSender IP: %s\n", 
-                     version, header_len, diffserv, ECN, ipheader->TTL, protocol, 
-                     check, checksum_host, ip_format);
+    fprintf(stdout, "\tIP Header\n\t\tIP Version: %u\n\t\t"
+         "Header Len (bytes): %u\n\t\tTOS subfields:\n\t\t"
+         "   Diffserv bits: %u\n\t\t   ECN bits: %u\n\t\t"
+         "TTL: %u\n\t\tProtocol: %s\n\t\t"
+         "Checksum: %s (0x%04x)\n\t\tSender IP: %s\n", 
+        version, header_len, diffserv, ECN, ipheader->TTL, 
+        protocol, check, ntohs(ipheader->checksum), ip_format);
     ip_format = inet_ntoa(ipheader->dst);
     fprintf(stdout, "\t\tDest IP: %s\n", ip_format);
 }
@@ -191,16 +186,13 @@ void print_icmphdr(struct icmp* icmpheader)
 
 void print_tcphdr(struct tcp* tcpheader, struct ip* ipheader)
 {
-    /* data offset gives size of tcp header */
     char* src_port = determine_port(tcpheader->src_port);
     char* dst_port = determine_port(tcpheader->dst_port);
-    /* convert data offset from network to host order */
-    uint16_t offset_host = (ntohs(tcpheader->offset_res_flags) >> 12) * WORD_LEN;
-    /* format buffer for flags: SYN, RST, FIN, ACK */
+    uint16_t offset_host = (ntohs(tcpheader->offset_res_flags) >> 12)*WORD_LEN;
     char* flagstr = get_flags(ntohs(tcpheader->offset_res_flags));
-    /* checksum as is */
     struct tcp_pseudo* pseudo = get_tcp_pseudo(tcpheader, ipheader);
-    uint16_t checksum = in_cksum((unsigned short*)pseudo, ntohs(pseudo->tcp_len) + TCP_PSEUDO_LEN);
+    uint16_t checksum = in_cksum((unsigned short*)pseudo, 
+                        ntohs(pseudo->tcp_len) + TCP_PSEUDO_LEN);
     char* check = (checksum == 0x0000) ? "Correct" : "Incorrect";
     fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\t"
                     "Dest Port:  %s\n\t\tSequence Number: %u\n\t\t"
@@ -208,7 +200,8 @@ void print_tcphdr(struct tcp* tcpheader, struct ip* ipheader)
                     "%s\n\t\tWindow Size: %u\n\t\tChecksum: %s (0x%04x)\n",
                     src_port, dst_port, ntohl(tcpheader->sequence), 
                     ntohl(tcpheader->ack), offset_host, flagstr, 
-                    ntohs(tcpheader->window_size), check, ntohs(tcpheader->checksum));
+                    ntohs(tcpheader->window_size), check, 
+                    ntohs(tcpheader->checksum));
     free(src_port);
     free(dst_port);
     free(flagstr);
@@ -223,8 +216,9 @@ char* get_flags(uint16_t offset_res_flags)
     char* fin = (offset_res_flags & TCP_FLAG_MASK_FIN) ? "Yes" : "No";
     char* ack = (offset_res_flags & TCP_FLAG_MASK_ACK) ? "Yes" : "No";
     snprintf(flagstr, sizeof(char) * 128, 
-            "SYN Flag: %s\n\t\tRST Flag: %s\n\t\tFIN Flag: %s\n\t\tACK Flag: %s",
-             syn,              rst,              fin,              ack);
+            "SYN Flag: %s\n\t\tRST Flag: %s\n\t\t"
+            "FIN Flag: %s\n\t\tACK Flag: %s",
+             syn, rst, fin, ack);
     return flagstr;
 }
 
