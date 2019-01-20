@@ -200,12 +200,8 @@ void print_tcphdr(struct tcp* tcpheader, struct ip* ipheader)
     char* flagstr = get_flags(ntohs(tcpheader->offset_res_flags));
     /* checksum as is */
     struct tcp_pseudo* pseudo = get_tcp_pseudo(tcpheader, ipheader);
-
     uint16_t checksum = in_cksum((unsigned short*)pseudo, ntohs(pseudo->tcp_len) + TCP_PSEUDO_LEN);
     char* check = (checksum == 0x0000) ? "Correct" : "Incorrect";
-    
-   
-
     fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n\t\tSequence Number: %u\n\t\tACK Number: %u\n\t\tData Offset (bytes): %u\n\t\t%s\n\t\tWindow Size: %u\n\t\tChecksum: %s (0x%04x)\n",
     src_port, dst_port, ntohl(tcpheader->sequence), ntohl(tcpheader->ack), offset_host, flagstr, ntohs(tcpheader->window_size), check, ntohs(tcpheader->checksum));
     free(src_port);
@@ -237,24 +233,14 @@ struct tcp_pseudo* get_tcp_pseudo(struct tcp* tcpheader, struct ip* ipheader)
     memcpy(&(pseudo->protocol), &(ipheader->protocol), sizeof(uint8_t));
     uint16_t tcp_len_network = get_tcp_len(tcpheader, ipheader);
     memcpy(&(pseudo->tcp_len), &tcp_len_network, sizeof(uint16_t));
-    /* printf("HHH: src: %s\n", inet_ntoa(pseudo->src));
-    printf("HHH: dst: %s\n", inet_ntoa(pseudo->dst));
-    printf("HHH: zer: %u\n", pseudo->zeros);
-    printf("HHH: pro: %u\n", pseudo->protocol);
-    printf("HHH: %u\n", ntohs(pseudo->tcp_len)); */
     return pseudo;
 }
 
 uint16_t get_tcp_len(struct tcp* tcpheader, struct ip* ipheader)
 {
-    /* uint16_t tcp_header_len = (ntohs(tcpheader->offset_res_flags) >> 12) * WORD_LEN; */
     uint16_t ip_header_len = ((ipheader->ver_IHL) & IP_IHL_MASK) * WORD_LEN;
     uint16_t ip_field_length = ntohs(ipheader->length);
-    /* printf("tcp header length: %u\n", tcp_header_len);
-    printf("ip header length: %u\n", ip_header_len);
-    printf("ip field length: %u\n", ip_field_length); */
     uint16_t tcp_seg_len = ip_field_length - ip_header_len;
-    /* printf("tcp seg len: %u\n", tcp_seg_len); */
     return htons(tcp_seg_len);
 }
 

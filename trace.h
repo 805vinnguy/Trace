@@ -82,6 +82,7 @@ struct tcp
     uint16_t window_size;
     uint16_t checksum;
     uint16_t urg;              /* urgent pointer */
+    uint8_t payload[65535];
     /* uint32_t options; */
 }__attribute__((packed));
 
