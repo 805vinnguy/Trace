@@ -1,5 +1,6 @@
-Program1_Trace
 trace
-*.sh
-*.out
-MyTestTraces
+*.gz
+Program1_Trace/Makefile
+*.tgz
+*.pdf
+Program1_Trace/libpcap-1.9.0
