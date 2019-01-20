@@ -120,7 +120,7 @@ struct udp
 #define IP_PROTO_ICMP 0x01
 #define IP_PROTO_TCP 0x06
 #define IP_PROTO_UDP 0x11
-#define IP_IHL_LEN 4
+#define WORD_LEN 4
 
 #define ICMP_ECHO_REQUEST 8
 #define ICMP_ECHO_REPLY 0
@@ -148,6 +148,7 @@ void print_ether_type(uint16_t type, const u_char* pktdata);
 void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL);
     void print_icmphdr(struct icmp* icmpheader);
     void print_tcphdr(struct tcp* tcpheader);
+        char* get_flags(uint16_t offset_res_flags);
     void print_udphdr(struct udp* udpheader);
         char* determine_port(uint16_t port_network);
 

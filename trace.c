@@ -109,7 +109,7 @@ void print_iphdr(struct ip* ipheader)
 {
     uint8_t version = (ipheader->ver_IHL) >> 4;
     uint8_t IHL = (ipheader->ver_IHL) & IP_IHL_MASK;
-    uint32_t header_len = IHL * IP_IHL_LEN;
+    uint32_t header_len = IHL * WORD_LEN;
     uint8_t diffserv = (ipheader->TOS) >> 2;
     uint8_t ECN = (ipheader->TOS) & IP_ECN_MASK;
     char* protocol = determine_ip_protocol(ipheader->protocol);
@@ -145,7 +145,7 @@ char* determine_ip_protocol(uint8_t protocol)
 
 void print_ip_protocol(uint8_t protocol, const u_char* pktdata, uint8_t IHL)
 {
-    uint32_t ip_header_len = IHL * IP_IHL_LEN;
+    uint32_t ip_header_len = IHL * WORD_LEN;
     struct icmp* icmpheader = NULL;
     struct tcp* tcpheader = NULL;
     struct udp* udpheader = NULL;
@@ -183,20 +183,36 @@ void print_tcphdr(struct tcp* tcpheader)
     /* data offset gives size of tcp header */
     char* src_port = determine_port(tcpheader->src_port);
     char* dst_port = determine_port(tcpheader->dst_port);
-    /* seq, ack as is */
-    /* data offset must be ntohs */
-    /* flags need to be masked but as is */
+    /* convert data offset from network to host order */
+    uint16_t offset_host = (ntohs(tcpheader->offset_res_flags) >> 12) * WORD_LEN;
+    /* format buffer for flags: SYN, RST, FIN, ACK */
+    char* flagstr = get_flags(ntohs(tcpheader->offset_res_flags));
     /* windowsize as is */
     /* checksum as is */
+    fprintf(stdout, "\n\tTCP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n\t\tSequence Number: %u\n\t\tACK Number: %u\n\t\tData Offset (bytes): %u\n\t\t%s\n\t\tWindow Size: %u\n\t\t",
+    src_port, dst_port, ntohl(tcpheader->sequence), ntohl(tcpheader->ack), offset_host, flagstr, ntohs(tcpheader->window_size));
+}
+
+char* get_flags(uint16_t offset_res_flags)
+{
+    char* flagstr = safe_malloc(sizeof(char) * 128);
+    char* syn = (offset_res_flags & TCP_FLAG_MASK_SYN) ? "Yes" : "No";
+    char* rst = (offset_res_flags & TCP_FLAG_MASK_RST) ? "Yes" : "No";
+    char* fin = (offset_res_flags & TCP_FLAG_MASK_FIN) ? "Yes" : "No";
+    char* ack = (offset_res_flags & TCP_FLAG_MASK_ACK) ? "Yes" : "No";
+    snprintf(flagstr, sizeof(char) * 128, 
+            "SYN Flag: %s\n\t\tRST Flag: %s\n\t\tFIN Flag: %s\n\t\tACK Flag: %s",
+             syn,              rst,              fin,              ack);
+    return flagstr;
 }
 
 void print_udphdr(struct udp* udpheader)
 {
     char* src_port = determine_port(udpheader->src_port);
     char* dst_port = determine_port(udpheader->dst_port);
-    fprintf(stdout, "\n\tUDP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n", src, dst);
-    free(src);
-    free(dst);
+    fprintf(stdout, "\n\tUDP Header\n\t\tSource Port:  %s\n\t\tDest Port:  %s\n", src_port, dst_port);
+    free(src_port);
+    free(dst_port);
 }
 
 char* determine_port(uint16_t port_network)
