@@ -1,5 +1,4 @@
 Packet Trace
 Utilizes pcap library to read and parse packet capture files.
-Essentially is a less verbose Wireshark.
 
 
