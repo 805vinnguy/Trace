@@ -1,6 +1,5 @@
-CPE 464 - Program 1 - Packet Trace
-Winter 2019 - noon
-Vinh Nguyen (vnguye95)
+Packet Trace
+Utilizes pcap library to read and parse packet capture files.
+Essentially is a less verbose Wireshark.
 
-Comments:
 
